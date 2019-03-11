@@ -1,3 +1,4 @@
+#Import required libraries
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -76,69 +77,89 @@ def append_df_to_excel(filename, df, sheet_name='Sheet1', startrow=None,
 
     # save the workbook
     writer.save()
-
+#Sets the display size of the output Dataframe 
 pd.set_option('display.max_columns', None)  
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('max_colwidth', -1)
 
+#Indicate file name and read the excel file in
 f='PandasBerrieCherries/BerrieCherries-New.xlsx'
 df=pd.read_excel(f, header=0)
 
+#Initialize a dictionary such that different product types associated to the same product are consistent 
 typedict={'rasp':['Rasp','RASP'], 'black':['Black','BLACK'], 'blue':['Blue','BLUE'],
 'straw':['FRAIS','STRAW'], 'cherries':['CERISE','CHERRIES']}
 
 def sku_ven(ty):
+  '''
+  Prints the most valuable SKUs associated to the product given (ty) and their total cost. Prints the 
+  most valuable vendors and the total amount of money given to them. 
+  Value is only dependant on the amount of money spent on either the product or the vendor.
+  SKU is ARTCLE_NUM per RCV_SITE_NUM
+  
+  Affects: Prints two dataframes
+  
+  sku_ven: Str -> None
+  '''
+  
+  '''
+  Initializes two dataframes with for each of the two types of product using typedict dictionary given above
+  '''
       dftype_s=df[df['PO_LINE_ITEM_DESC'].str.contains(typedict[ty][0])]
 
 
       dftype_c=df[df['PO_LINE_ITEM_DESC'].str.contains(typedict[ty][1])]
-
-      dft=pd.concat([dftype_c,dftype_s])
-
-      df_sku=dft.groupby(['ARTCL_NUM','RCV_SITE_NUM'],sort=False).sum()
-      df_skuf=df_sku.sort_values(by=['PO_LINE_AMT'],ascending=False)
-
-      print (df_skuf.head())
-
+      
+# Concatonate the two DFs into one DF
+      dft=pd.concat([dftype_c,dftype_s]) 
+#Group df by SKU
+      df_sku=dft.groupby(['ARTCL_NUM','RCV_SITE_NUM'],sort=False).sum() 
+  #Sort df in descending order of total money spent
+      df_skuf=df_sku.sort_values(by=['PO_LINE_AMT'],ascending=False) 
+      print (df_skuf.head()) #Print most valuable SKU DF
+      
+#Group df by Vendor Number 
       df_ven=dft.groupby(['PO_VEND_NUM'],sort=False).sum()
+  #Sort in descending order of total maney spent
       df_venf=df_ven.sort_values(by=['PO_LINE_AMT'],ascending=False)
-
+#Print head of Most valuable Vendors DF
       print (df_venf.head())
 
       print (df_skuf.index.values.tolist()[0][0])
 
-      #Define MVSKU dataframes and export to excel sheets
+      #Define MV_SKU dataframes and export to excel sheets
+      #1st most valuable product
       df_skuf_1art=df[df['ARTCL_NUM']==(df_skuf.index.values.tolist()[0][0])]
       df_skuf_1=df_skuf_1art[df_skuf_1art['RCV_SITE_NUM']== (df_skuf.index.values.tolist()[0][1])]
 
       df_skuf_1 = df_skuf_1.assign(price_per_unit=df_skuf_1['PO_LINE_AMT']/df_skuf_1['PO_LINE_QTY'])
-
+      #Sort records according to ascending dates
       df_skuf_1f=df_skuf_1.sort_values(by=['DELV_DT'],ascending=True)
 
       print(df_skuf_1f.head())
 
-
+      #2nd most valuable product
       df_skuf_2art=df[df['ARTCL_NUM']==(df_skuf.index.values.tolist()[1][0])]
       df_skuf_2=df_skuf_2art[df_skuf_2art['RCV_SITE_NUM']== (df_skuf.index.values.tolist()[1][1])]
 
       df_skuf_2 = df_skuf_2.assign(price_per_unit=df_skuf_2['PO_LINE_AMT']/df_skuf_2['PO_LINE_QTY'])
-
+      #Sort records according to ascending dates
       df_skuf_2f=df_skuf_2.sort_values(by=['DELV_DT'],ascending=True)
 
       print(df_skuf_2f.head())
 
-
+      #3rd most valuable product
       df_skuf_3art=df[df['ARTCL_NUM']==(df_skuf.index.values.tolist()[2][0])]
       df_skuf_3=df_skuf_3art[df_skuf_3art['RCV_SITE_NUM']== (df_skuf.index.values.tolist()[2][1])]
 
       df_skuf_3 = df_skuf_3.assign(price_per_unit=df_skuf_3['PO_LINE_AMT']/df_skuf_3['PO_LINE_QTY'])
-
+      #Sort records according to ascending dates
       df_skuf_3f=df_skuf_3.sort_values(by=['DELV_DT'],ascending=True)
 
       print(df_skuf_3f.head())
 
 
-
+      #initialize sheet names per product
       sheet1=ty+'-1'
       sheet2=ty+'-2'
       sheet3=ty+'-3'
@@ -174,7 +195,7 @@ def sku_ven(ty):
       return 1
       
 
-sku_ven('rasp')
+sku_ven('rasp') #example call
 
 
 
