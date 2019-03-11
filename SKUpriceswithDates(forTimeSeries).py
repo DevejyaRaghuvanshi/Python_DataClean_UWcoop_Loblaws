@@ -1,3 +1,7 @@
+'''
+Create an Excel file and add a table to one sheet with the most valuable berry products and their price over time.
+Dates are constantly increasing day by day instead of showing only the days at which transactions were made.
+'''
 #import required libraries
 import pandas as pd
 from functools import reduce #reduce works like filter and map
